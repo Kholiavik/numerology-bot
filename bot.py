@@ -1,54 +1,29 @@
+import asyncio
+import os
 from datetime import datetime
 
-ZK_TEXTS = {
-    1: "Знания, учеба, общение. Действие начинается с мысли.",
-    2: "Общение с женщинами рода, природа, животные, интуиция.",
-    3: "Дети и любые собственные проекты. Развивай свои идеи.",
-    4: "Карьера, бизнес, учеба. Терпение и труд.",
-    5: "Духовный путь и познание мира.",
-    6: "Семья, друзья, близкие люди. Умение делать выбор.",
-    7: "Свобода, путешествия, движение.",
-    8: "Структура, порядок, справедливость.",
-    9: "Самопознание, независимость.",
-    10: "Подарки судьбы, праздники, благополучие.",
-    11: "Спорт, активность, преодоление препятствий.",
-    12: "Общение, признание, творчество.",
-    13: "Нестандартность, трансформация, завершение циклов.",
-    14: "Ремесло, ручной труд, золотая середина.",
-    15: "Яркая жизнь, творчество, контроль искушений.",
-    16: "Собственность, личное пространство, дом.",
-    17: "Творчество и раскрытие талантов.",
-    18: "Уютный дом, красота, эмоциональность.",
-    19: "Лидерство, власть, положение в обществе.",
-    20: "Большая семья, друзья, родовые корни.",
-    21: "Международность, свобода выбора, самореализация.",
-    22: "Друзья, встречи, лёгкость общения."
-}
+from aiogram import Bot, Dispatcher, F
+from aiogram.filters import CommandStart
+from aiogram.types import Message
+from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-KCH_TEXTS = {
-    1: "Самонадеянность, нежелание учиться, осваивать новые технологии. Некорректное отношение к учителям и наставникам.",
-    2: "Зависть, неуважение к женщинам, обидчивость, капризность, раздражение к чужим слабостям.",
-    3: "Нежелание иметь детей, жадность, чувство собственности. Нежелание слушать советы родителей.",
-    4: "Холодность, жесткость, грубый подход к людям. Зацикленность на карьере и материальных благах.",
-    5: "Грубость, хамство, неуважение к мужчинам и старшим. Эгоизм и высокомерие.",
-    6: "Непостоянство, склонность к изменам, сомнения в правильности выбора.",
-    7: "Лень, нежелание развиваться и двигаться вперед. Хитрость и страх сильного соперника.",
-    8: "Игнорирование правил и законов. Мстительность, конфликтность, навязывание своих правил.",
-    9: "Страх критических ситуаций, склонность к одиночеству и позиции жертвы.",
-    10: "Меркантильность, корысть, финансовая нечистоплотность.",
-    11: "Вспыльчивость, драчливость, неумение контролировать эмоции.",
-    12: "Хамство, наглость, отсутствие сочувствия и благодарности.",
-    13: "Аффективное поведение, жесткость, неуважение к здоровью, эгоизм.",
-    14: "Жадность, потребительство, склонность к шантажу и манипуляциям.",
-    15: "Шантаж, мстительность, резкие перепады настроения, склонность к изменам.",
-    16: "Самодурство, категоричность, отсутствие компромиссов, тирания в семье.",
-    17: "Идейность без действий. Склонность использовать чужой труд и присваивать заслуги.",
-    18: "Лживость, притворство, жизнь в иллюзиях, перекладывание вины на других.",
-    19: "Жажда власти и контроля, манипулирование людьми.",
-    20: "Отрицание своего рода, неуважение к традициям и предкам.",
-    21: "Высокомерие, стремление к роскоши и показному статусу.",
-    22: "Игра роли жертвы. Перекладывание ответственности на других."
-}
+
+from zk_texts import ZK_TEXTS
+
+from kch_texts import KCH_TEXTS
+
+from arcane_types import get_arcane_type, get_adult_meaning
+
+TOKEN = os.getenv("BOT_TOKEN")
+
+if not TOKEN:
+    raise RuntimeError("BOT_TOKEN не задан")
+
+bot = Bot(token=TOKEN)
+dp = Dispatcher()
+
+user_choice = {}
+
 
 def reduce_to_22(number):
     while number > 22:
@@ -70,6 +45,7 @@ def calculate_comfort_zone(day, month, year):
     return reduce_to_22(result)
 
 
+
 def calculate_partner_problem(day, month, year):
     dt = reduce_to_22(day)
     gt = calculate_year_arcane(year)
@@ -82,96 +58,124 @@ def calculate_partner_problem(day, month, year):
     return result
 
 
-def get_arcane_type(number):
-    destiny_arcanes = [1, 2, 5, 6, 9, 10, 13, 14, 15, 16, 20]
-    will_arcanes = [3, 4, 7, 8, 11, 12, 17, 18, 19, 21, 22]
 
-    if number in destiny_arcanes:
-        return "Аркан Судьбы"
+def parse_birth_date(text):
+    text = text.strip()
 
-    if number in will_arcanes:
-        return "Аркан Воли"
+    if text.isdigit() and len(text) == 8:
+        text = text[:2] + "." + text[2:4] + "." + text[4:]
 
-    return "Неизвестный тип аркана"
+    birth_date = datetime.strptime(text, "%d.%m.%Y")
+    return birth_date.day, birth_date.month, birth_date.year
 
 
-def get_adult_meaning(arcane_type):
-    if arcane_type == "Аркан Судьбы":
-        return (
-            "Если в ЗК у вас получился аркан Судьбы, "
-            "то Судьба сама приведёт вас к вашей зоне комфорта. "
-            "От вас требуется расслабиться и довериться высшим силам."
+def main_menu():
+    kb = ReplyKeyboardBuilder()
+    kb.button(text="Зона комфорта для детей")
+    kb.button(text="Проблемы в партнерстве")
+    kb.button(text="Аркан Судьбы или Воли")
+    kb.button(text="Выбрать другой расчёт")
+    kb.adjust(1)
+    return kb.as_markup(resize_keyboard=True)
+
+@dp.message(CommandStart())
+async def start(message: Message):
+    await message.answer(
+        "Выберите расчет:",
+        reply_markup=main_menu()
+    )
+
+
+@dp.message(F.text == "Выбрать другой расчёт")
+async def choose_another(message: Message):
+    user_choice.pop(message.from_user.id, None)
+
+    await message.answer(
+        "Выберите расчет:",
+        reply_markup=main_menu()
+    )
+
+
+@dp.message(F.text.in_([
+    "Зона комфорта для детей",
+    "Проблемы в партнерстве",
+    "Аркан Судьбы или Воли"
+]))
+async def choose_calculation(message: Message):
+    user_choice[message.from_user.id] = message.text
+
+    await message.answer(
+        "Введите дату рождения.\n\n"
+        "Можно так: 01.01.1999\n"
+        "Или так: 01011999"
+    )
+
+
+@dp.message(F.text)
+async def handle_date(message: Message):
+    choice = user_choice.get(message.from_user.id)
+
+    if not choice:
+        await message.answer(
+            "Сначала выберите расчет:",
+            reply_markup=main_menu()
         )
+        return
 
-    if arcane_type == "Аркан Воли":
-        return (
-            "Если в ЗК у вас получился аркан Воли, "
-            "то для раскрытия своих потенциалов вам придётся приложить усилия, "
-            "потрудиться и самостоятельно защищать свой комфорт."
+    try:
+        day, month, year = parse_birth_date(message.text)
+    except ValueError:
+        await message.answer(
+            "Ошибка. Введите дату правильно:\n"
+            "20.05.1981 или 20051981"
         )
+        return
 
-    return "Для этого аркана пока нет описания."
+    if choice == "Зона комфорта для детей":
+        result = calculate_comfort_zone(day, month, year)
 
-
-def get_birth_date():
-    while True:
-        date_text = input("Введите дату рождения: ")
-
-        if date_text.isdigit() and len(date_text) == 8:
-            date_text = date_text[:2] + "." + date_text[2:4] + "." + date_text[4:]
-
-        try:
-            birth_date = datetime.strptime(date_text, "%d.%m.%Y")
-            return birth_date.day, birth_date.month, birth_date.year
-
-        except ValueError:
-            print("Ошибка. Введите дату, например: 20.05.1981 или 20051981")
-
-
-print("Что посчитать?")
-print("1 — Зона комфорта для детей")
-print("2 — Проблемы в партнёрстве / КЧХ")
-print("3 — Аркан Судьбы или Воли по ЗК")
-
-choice = input("Введите номер: ")
-
-day, month, year = get_birth_date()
-
-if choice == "1":
-    result = calculate_comfort_zone(day, month, year)
-
-    print()
-    print("Зона комфорта для детей =", result)
-    print()
-
-    print(ZK_TEXTS.get(
-        result,
-        "Для этого аркана пока нет расшифровки."
-    ))
-
-elif choice == "2":
-    result = calculate_partner_problem(day, month, year)
-
-    print()
-    print("Проблемы в партнёрстве / КЧХ =", result)
-    print()
-
-    print(
-        KCH_TEXTS.get(
+        text = ZK_TEXTS.get(
             result,
             "Для этого аркана пока нет расшифровки."
         )
-    )
 
-elif choice == "3":
-    zk = calculate_comfort_zone(day, month, year)
-    arcane_type = get_arcane_type(zk)
-    meaning = get_adult_meaning(arcane_type)
+        await message.answer(
+            f"Зона комфорта для детей = {result}\n\n"
+            f"{text}"
+        )
 
-    print("ЗК =", zk)
-    print("Тип =", arcane_type)
-    print()
-    print(meaning)
+    elif choice == "Проблемы в партнерстве":
+        result = calculate_partner_problem(day, month, year)
 
-else:
-    print("Такого варианта пока нет.")
+        text = KCH_TEXTS.get(
+            result,
+            "Для этого аркана пока нет расшифровки."
+        )
+
+        await message.answer(
+            f"Проблемы в партнёрстве / КЧХ = {result}\n\n"
+            f"{text}"
+        )
+
+    elif choice == "Аркан Судьбы или Воли":
+        zk = calculate_comfort_zone(day, month, year)
+        arcane_type = get_arcane_type(zk)
+        meaning = get_adult_meaning(arcane_type)
+
+        await message.answer(
+            f"ЗК = {zk}\n"
+            f"Тип: {arcane_type}\n\n"
+            f"{meaning}"
+        )
+
+    else:
+        await message.answer("Этот расчет добавим следующим шагом.")
+
+    user_choice.pop(message.from_user.id, None)
+
+async def main():
+    await dp.start_polling(bot)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
