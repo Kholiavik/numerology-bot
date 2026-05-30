@@ -1,6 +1,7 @@
 import asyncio
 import os
 from datetime import datetime
+from aiogram.filters import Command
 
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import CommandStart
@@ -23,7 +24,11 @@ bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
 user_choice = {}
+users = set()
+calculations_count = 0
 
+
+ADMIN_ID = int(os.getenv("ADMIN_ID", "0"))
 
 def reduce_to_22(number):
     while number > 22:
@@ -105,11 +110,24 @@ START_TEXT = """✨ Если бы ваша жизнь стала книгой, �
 
 @dp.message(CommandStart())
 async def start(message: Message):
+    users.add(message.from_user.id)
+
     await message.answer(
         START_TEXT,
         reply_markup=main_menu()
     )
 
+@dp.message(Command("admin"))
+async def admin_panel(message: Message):
+    if message.from_user.id != ADMIN_ID:
+        await message.answer("У вас нет доступа к админ-панели.")
+        return
+
+    await message.answer(
+        "📊 Админ-панель\n\n"
+        f"👥 Пользователей за время работы: {len(users)}\n"
+        f"🧮 Расчётов за время работы: {calculations_count}"
+    )
 
 @dp.message(F.text == "Выбрать другой расчёт")
 async def choose_another(message: Message):
@@ -138,6 +156,8 @@ async def choose_calculation(message: Message):
 
 @dp.message(F.text)
 async def handle_date(message: Message):
+        global calculations_count
+    users.add(message.from_user.id)
     choice = user_choice.get(message.from_user.id)
 
     if not choice:
@@ -195,6 +215,8 @@ async def handle_date(message: Message):
 
     else:
         await message.answer("Этот расчет добавим следующим шагом.")
+
+    calculations_count += 1
 
     user_choice.pop(message.from_user.id, None)
 
