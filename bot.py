@@ -156,7 +156,7 @@ async def choose_calculation(message: Message):
 
 @dp.message(F.text)
 async def handle_date(message: Message):
-        global calculations_count
+    global calculations_count
     users.add(message.from_user.id)
     choice = user_choice.get(message.from_user.id)
 
