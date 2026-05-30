@@ -78,10 +78,24 @@ def main_menu():
     kb.adjust(1)
     return kb.as_markup(resize_keyboard=True)
 
+START_TEXT = """✨ Если бы ваша жизнь стала книгой, как бы назывались её главы? ✨
+
+📖 Сейчас для вас доступны первые разделы Книги Жизни:
+
+✅ Зона комфорта для детей
+✅ Проблемы в партнёрстве
+✅ Аркан Судьбы или Аркан Воли
+
+Выберите интересующий расчёт в меню ниже.
+
+✨ Возможно, самая интересная книга — это книга о вас самих.
+"""
+
+
 @dp.message(CommandStart())
 async def start(message: Message):
     await message.answer(
-        "Выберите расчет:",
+        START_TEXT,
         reply_markup=main_menu()
     )
 
