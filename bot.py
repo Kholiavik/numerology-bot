@@ -144,7 +144,7 @@ async def choose_calculation(message: Message):
         await message.answer(
             "Вы уже выбрали расчёт.\n\n"
             "Введите дату рождения, чтобы продолжить:\n"
-            "Например: 01.01.1999 или 01011999\n\n"
+            "Например: 01.01.1970 или 01011970\n\n"
             "Или нажмите «Выбрать другой расчёт»."
         )
         return
@@ -153,8 +153,8 @@ async def choose_calculation(message: Message):
 
     await message.answer(
         "Введите дату рождения.\n\n"
-        "Можно так: 01.01.1999\n"
-        "Или так: 01011999"
+        "Можно так: 01.01.1970\n"
+        "Или так: 01011970"
     )
 
 
@@ -177,7 +177,7 @@ async def handle_date(message: Message):
     except ValueError:
         await message.answer(
             "Ошибка. Введите дату правильно:\n"
-            "20.05.1981 или 20051981"
+            "01.01.1970 или 01011970"
         )
         return
 
