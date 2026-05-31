@@ -116,12 +116,10 @@ async def start(message: Message):
 
 @dp.message(Command("admin"))
 async def admin_panel(message: Message):
-    if message.from_user.id != ADMIN_ID:
-        await message.answer("У вас нет доступа к админ-панели.")
-        return
-
     await message.answer(
         "📊 Админ-панель\n\n"
+        f"Ваш Telegram ID: {message.from_user.id}\n"
+        f"ADMIN_ID в Render: {ADMIN_ID}\n\n"
         f"👥 Пользователей за время работы: {len(users)}\n"
         f"🧮 Расчётов за время работы: {calculations_count}"
     )
