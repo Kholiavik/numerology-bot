@@ -17,7 +17,8 @@ TOKEN = os.getenv("BOT_TOKEN")
 if not TOKEN:
     raise RuntimeError("BOT_TOKEN не задан")
 
-ADMIN_ID = int(os.getenv("ADMIN_ID", "0"))
+#ADMIN_ID = int(os.getenv("ADMIN_ID", "0"))
+ADMIN_ID = 387254782
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
