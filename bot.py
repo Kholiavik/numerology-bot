@@ -16,7 +16,7 @@ TOKEN = os.getenv("BOT_TOKEN")
 
 if not TOKEN:
     raise RuntimeError("BOT_TOKEN не задан")
-    
+
 ADMIN_ID = 387254782
 
 bot = Bot(token=TOKEN)
@@ -42,7 +42,6 @@ def calculate_comfort_zone(day, month, year):
     dt = reduce_to_22(day)
     mt = month
     gt = calculate_year_arcane(year)
-
     result = dt + 2 * mt + gt
     return reduce_to_22(result)
 
@@ -50,7 +49,6 @@ def calculate_comfort_zone(day, month, year):
 def calculate_partner_problem(day, month, year):
     dt = reduce_to_22(day)
     gt = calculate_year_arcane(year)
-
     result = abs(dt - gt)
 
     if result == 0:
@@ -142,6 +140,15 @@ async def choose_another(message: Message):
     "Аркан Судьбы или Воли"
 ]))
 async def choose_calculation(message: Message):
+    if message.from_user.id in user_choice:
+        await message.answer(
+            "Вы уже выбрали расчёт.\n\n"
+            "Введите дату рождения, чтобы продолжить:\n"
+            "Например: 20.05.1981 или 20051981\n\n"
+            "Или нажмите «Выбрать другой расчёт»."
+        )
+        return
+
     user_choice[message.from_user.id] = message.text
 
     await message.answer(
@@ -176,11 +183,7 @@ async def handle_date(message: Message):
 
     if choice == "Зона комфорта для детей":
         result = calculate_comfort_zone(day, month, year)
-
-        text = ZK_TEXTS.get(
-            result,
-            "Для этого аркана пока нет расшифровки."
-        )
+        text = ZK_TEXTS.get(result, "Для этого аркана пока нет расшифровки.")
 
         await message.answer(
             f"Зона комфорта для детей = {result}\n\n"
@@ -189,11 +192,7 @@ async def handle_date(message: Message):
 
     elif choice == "Проблемы в партнерстве":
         result = calculate_partner_problem(day, month, year)
-
-        text = KCH_TEXTS.get(
-            result,
-            "Для этого аркана пока нет расшифровки."
-        )
+        text = KCH_TEXTS.get(result, "Для этого аркана пока нет расшифровки.")
 
         await message.answer(
             f"Проблемы в партнёрстве / КЧХ = {result}\n\n"
