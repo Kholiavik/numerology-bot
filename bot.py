@@ -16,8 +16,7 @@ TOKEN = os.getenv("BOT_TOKEN")
 
 if not TOKEN:
     raise RuntimeError("BOT_TOKEN не задан")
-
-#ADMIN_ID = int(os.getenv("ADMIN_ID", "0"))
+    
 ADMIN_ID = 387254782
 
 bot = Bot(token=TOKEN)
@@ -117,10 +116,11 @@ async def start(message: Message):
 
 @dp.message(Command("admin"))
 async def admin_panel(message: Message):
+    if message.from_user.id != ADMIN_ID:
+        return
+
     await message.answer(
         "📊 Админ-панель\n\n"
-        f"Ваш Telegram ID: {message.from_user.id}\n"
-        f"ADMIN_ID в Render: {ADMIN_ID}\n\n"
         f"👥 Пользователей за время работы: {len(users)}\n"
         f"🧮 Расчётов за время работы: {calculations_count}"
     )
