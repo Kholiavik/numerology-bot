@@ -140,22 +140,14 @@ async def choose_another(message: Message):
     "Аркан Судьбы или Воли"
 ]))
 async def choose_calculation(message: Message):
-    if message.from_user.id in user_choice:
-        await message.answer(
-            "Вы уже выбрали расчёт.\n\n"
-            "Введите дату рождения, чтобы продолжить:\n\n"
-            "Можно так: 01.01.1989\n"
-            "Или так: 01011989\n\n"
-            "Или нажмите «Выбрать другой расчёт»."
-        )
-        return
-
-    user_choice[message.from_user.id] = message.text
+    if message.from_user.id not in user_choice:
+        user_choice[message.from_user.id] = message.text
 
     await message.answer(
-        "Введите дату рождения.\n\n"
-        "Можно так: 01.01.1989\n"
-        "Или так: 01011989"
+        "Вы уже выбрали расчёт.\n\n"
+        "Введите дату рождения, чтобы продолжить:\n"
+        "Например: 01.01.1970 или 01011970\n\n"
+        "Или нажмите «Выбрать другой расчёт»."
     )
 
 
