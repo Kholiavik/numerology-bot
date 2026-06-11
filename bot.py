@@ -73,7 +73,6 @@ def main_menu():
     kb.button(text="Проблемы в партнерстве")
     kb.button(text="Аркан Судьбы или Воли")
     kb.button(text="Выбрать другой расчёт")
-    kb.button(text="Заказать личный нумерологический мини-расчёт за 10 евро")
     kb.adjust(1)
     return kb.as_markup(resize_keyboard=True)
 
@@ -220,6 +219,14 @@ async def handle_date(message: Message):
     else:
         await message.answer("Этот расчет добавим следующим шагом.")
 
+    await message.answer(
+        "✨ Хотите получить личный мини-разбор по вашей дате рождения?\n\n"
+        "Стоимость: 10 евро.\n\n"
+        "Для заказа напишите мне в личные сообщения.\n\n"
+        "Также вы можете выбрать другой бесплатный расчёт в меню ниже.",
+        reply_markup=main_menu()
+    )
+    
     calculations_count += 1
     user_choice.pop(message.from_user.id, None)
 
