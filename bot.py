@@ -73,6 +73,7 @@ def main_menu():
     kb.button(text="Проблемы в партнерстве")
     kb.button(text="Аркан Судьбы или Воли")
     kb.button(text="Выбрать другой расчёт")
+    kb.button(text="Заказать личный нумерологический мини-расчёт за 10 евро")
     kb.adjust(1)
     return kb.as_markup(resize_keyboard=True)
 
@@ -133,6 +134,19 @@ async def choose_another(message: Message):
         reply_markup=main_menu()
     )
 
+@dp.message(F.text == "Заказать личный нумерологический мини-расчёт за 10 евро")
+async def order_personal_report(message: Message):
+    await message.answer(
+        "✨ Личный нумерологический мини-расчёт стоит 10 евро.\n\n"
+        "В него входит краткий разбор по вашей дате рождения:\n"
+        "• сильные стороны и таланты\n"
+        "• главные жизненные задачи\n"
+        "• родовые программы и уроки\n"
+        "• что помогает раскрыть потенциал\n"
+        "• важные периоды и точки роста в жизни\n\n"
+        "Для заказа напишите сюда:\n"
+        "@YanaHolyavik"
+    )
 
 @dp.message(F.text.in_([
     "Зона комфорта для детей",
