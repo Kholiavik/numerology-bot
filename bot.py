@@ -147,15 +147,16 @@ async def choose_another(message: Message):
 ]))
 async def order_personal_report(message: Message):
     await message.answer(
-        "✨ Личный нумерологический мини-расчёт стоит 10 евро.\n\n"
-        "В него входит краткий разбор по вашей дате рождения:\n"
-        "• сильные стороны и таланты\n"
-        "• главные жизненные задачи\n"
-        "• родовые программы и уроки\n"
-        "• что помогает раскрыть потенциал\n"
-        "• важные периоды и точки роста в жизни\n\n"
-        "Для заказа напишите сюда:\n"
-        "@YanaHolyavik"
+        "✨ Заявка принята.\n\n"
+        "Я получила уведомление и скоро свяжусь с вами для оформления личного мини-расчёта."
+    )
+
+    await bot.send_message(
+        ADMIN_ID,
+        "🔔 Новая заявка на мини-расчёт за 10 евро\n\n"
+        f"Имя: {message.from_user.full_name}\n"
+        f"Username: @{message.from_user.username}\n"
+        f"Telegram ID: {message.from_user.id}"
     )
 
 @dp.message(F.text.in_([
