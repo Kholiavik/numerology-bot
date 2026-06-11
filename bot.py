@@ -4,7 +4,7 @@ from datetime import datetime
 
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import CommandStart, Command
-from aiogram.types import Message
+from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from zk_texts import ZK_TEXTS
@@ -76,6 +76,14 @@ def main_menu():
     kb.adjust(1)
     return kb.as_markup(resize_keyboard=True)
 
+def after_result_menu():
+    return ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="✨ Заказать нумерологический мини-расчёт за 10 евро")],
+            [KeyboardButton(text="🔄 Выбрать другой расчёт")]
+        ],
+        resize_keyboard=True
+    )
 
 START_TEXT = """✨ Если бы ваша жизнь стала книгой, как бы назывались её главы? ✨
 
@@ -124,7 +132,7 @@ async def admin_panel(message: Message):
     )
 
 
-@dp.message(F.text == "Выбрать другой расчёт")
+@dp.message(F.text.in_(["Выбрать другой расчёт", "🔄 Выбрать другой расчёт"]))
 async def choose_another(message: Message):
     user_choice.pop(message.from_user.id, None)
 
@@ -133,7 +141,10 @@ async def choose_another(message: Message):
         reply_markup=main_menu()
     )
 
-@dp.message(F.text == "Заказать личный нумерологический мини-расчёт за 10 евро")
+@dp.message(F.text.in_([
+    "Заказать личный нумерологический мини-расчёт за 10 евро",
+    "✨ Заказать нумерологический мини-расчёт за 10 евро"
+]))
 async def order_personal_report(message: Message):
     await message.answer(
         "✨ Личный нумерологический мини-расчёт стоит 10 евро.\n\n"
@@ -221,15 +232,12 @@ async def handle_date(message: Message):
 
     await message.answer(
         "✨ Хотите получить личный мини-разбор по вашей дате рождения?\n\n"
-        "Стоимость: 10 евро.\n\n"
-        "Для заказа напишите мне в личные сообщения.\n\n"
-        "Также вы можете выбрать другой бесплатный расчёт в меню ниже.",
-        reply_markup=main_menu()
+        "Выберите действие:",
+        reply_markup=after_result_menu()
     )
-    
+
     calculations_count += 1
     user_choice.pop(message.from_user.id, None)
-
 
 async def main():
     await dp.start_polling(bot)
